@@ -1,0 +1,24 @@
+FROM node:lts-alpine
+
+RUN mkdir -p app/
+RUN mkdir -p app/backend
+
+RUN apk update && apk add bash
+
+WORKDIR /backend
+
+COPY package*.json ./
+
+RUN npm cache clean --force && rm -rf node_modules
+
+COPY yarn.lock ./
+# install project dependencies
+RUN yarn install
+
+# copy project files and folders to the current working directory (i.e. 'app' folder)
+COPY . .
+
+EXPOSE 4040
+
+# run backend
+CMD [ "npm", "start" ]

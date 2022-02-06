@@ -1,0 +1,35 @@
+version: '3.3'
+services:
+  mysql:
+    command: --default-authentication-plugin=mysql_native_password
+    image: mysql:latest
+    container_name: mysql
+    restart: always
+    expose:
+      - "3306"
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: supersecretpassword
+      MYSQL_DATABASE: easyGo
+      MYSQL_USER: user
+      MYSQL_PASSWORD: supersecretpassword
+  backend:
+    command: bash -c 'while !</dev/tcp/mysql/3306; do sleep 1; done; npm start'
+    build: ./backend
+    restart: always
+    depends_on:
+      - mysql
+    ports:
+      - "4040:4040"
+    links:
+      - mysql
+    environment:
+      DB_HOST: mysql
+  frontend:
+    build: ./frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "8080:8080"
